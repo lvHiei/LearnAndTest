@@ -28,12 +28,24 @@ namespace vvav {
         ::usleep(milliseconds * 1000);
     }
 
+    void TimeUtil::usleep(int useconds) {
+        ::usleep(useconds);
+    }
+
     uint64_t TimeUtil::GetTickCount64() {
         struct timeval tv;
         gettimeofday(&tv, NULL);
 
         uint64_t mt = ((uint64_t) tv.tv_sec) * 1000 + (uint64_t) tv.tv_usec / 1000;
 
+        return mt;
+    }
+
+	uint64_t TimeUtil::GetTickCountUs(){
+        struct timeval tv;
+        gettimeofday(&tv, NULL);
+
+        uint64_t mt = ((uint64_t) tv.tv_sec) * 1000000 + (uint64_t) tv.tv_usec;
         return mt;
     }
 } //namespace vvav

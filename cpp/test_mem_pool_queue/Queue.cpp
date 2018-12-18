@@ -475,26 +475,18 @@ namespace vvav {
             }
         }
 
-        if(pkt->capacity == m_iMemPoolMinCapacity){
-            StruPacketList* loopPkt = m_pMemPoolFirstPtk;
-            int minCapacity = INT32_MAX;
-            while (loopPkt){
-                if(loopPkt->capacity < minCapacity){
-                    minCapacity = loopPkt->capacity;
-                }
-                loopPkt = loopPkt->next;
-            }
-            m_iMemPoolMinCapacity = minCapacity;
-        }
+        updateMemPoolValue();
 
         --m_nMemPoolPackets;
         LOGI("handleGetPakcet mempoolsize:%d", m_nMemPoolPackets);
 
+        
         int i = 0;
         for(StruPacketList* lPtk = m_pMemPoolFirstPtk; lPtk != NULL; lPtk = lPtk->next){
-            LOGI("handleGetPakcet pakcet %p", lPtk);
+        //    LOGI("handleGetPakcet pakcet %p", lPtk);
             i++;
         }
+        
 
         if(i != m_nMemPoolPackets){
             LOGI("handleGetPakcet error packets:%d, count:%d", m_nMemPoolPackets, i);
@@ -550,19 +542,12 @@ namespace vvav {
         StruPacketList* minLastPkt = NULL;
         StruPacketList* loopPkt = m_pMemPoolFirstPtk;
         StruPacketList* loopLastPkt = NULL;
-        int32_t scdMinCapacity = INT32_MAX;
 
         while(loopPkt){
             if(loopPkt->capacity == m_iMemPoolMinCapacity){
-                if(!minPkt){
-                    minPkt = loopPkt;
-                    minLastPkt = loopLastPkt;
-                }else{
-                    scdMinCapacity = m_iMemPoolMinCapacity;
-                    break;
-                }
-            }else if(loopPkt->capacity < scdMinCapacity){
-                scdMinCapacity = loopPkt->capacity;
+                minPkt = loopPkt;
+                minLastPkt = loopLastPkt;
+                break;
             }
 
             loopLastPkt = loopPkt;
@@ -585,23 +570,45 @@ namespace vvav {
             minLastPkt->next = pkt;
         }
 
+        updateMemPoolValue();
+
+        
         int i = 0;
         for(StruPacketList* lPtk = m_pMemPoolFirstPtk; lPtk != NULL; lPtk = lPtk->next){
-            LOGI("addMemPoolPacket full pakcet %p", lPtk);
+        //    LOGI("addMemPoolPacket full pakcet %p", lPtk);
             i++;
         }
-
+        
         if(i != m_nMemPoolPackets){
             LOGI("addMemPoolPacket error packets:%d, count:%d", m_nMemPoolPackets, i);
         }
 
         delete[] minPkt->data;
         delete minPkt;
-        m_iMemPoolMinCapacity = scdMinCapacity;
 
         return true;
     }
 
+    void Queue::updateMemPoolValue() {
+        // 调用该函数的时候保证外面加锁
+        int minCapacity = INT32_MAX;
+        int maxCapacity = 0;
+
+        StruPacketList* loopPkt = m_pMemPoolFirstPtk;
+        while (loopPkt){
+            if(loopPkt->capacity > maxCapacity){
+                m_iMemPoolMaxCapacity = maxCapacity;
+            }
+
+            if(loopPkt->capacity < minCapacity){
+                minCapacity = loopPkt->capacity;
+            }
+            loopPkt = loopPkt->next;
+        }
+
+        m_iMemPoolMaxCapacity = maxCapacity;
+        m_iMemPoolMinCapacity = minCapacity;
+    }
 
     void Queue::finish() {
         pthread_mutex_lock(&m_mutex);

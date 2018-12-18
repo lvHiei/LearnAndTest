@@ -19,8 +19,10 @@ namespace vvav {
 		// 线程sleep
 		// @param milliseconds 休眠毫秒数
 		static void sleep(int milliseconds);
+		static void usleep(int useconds);
 
 		static uint64_t GetTickCount64();
+		static uint64_t GetTickCountUs();
 	};
 
 

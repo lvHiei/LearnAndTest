@@ -9,7 +9,7 @@
 #include <pthread.h>
 
 namespace vvav {
-#define MAX_MEM_POOL_QUEUE_LENGTH  5
+#define MAX_MEM_POOL_QUEUE_LENGTH  20
 
     typedef struct PacketList {
         void *data;            // 数据
@@ -67,6 +67,9 @@ namespace vvav {
 
         // 内部清空缓存队列，不加锁
         void clearMemPoolQueue();
+
+        // 更新内存池中最大最小值
+        void updateMemPoolValue();
 
     private:
         StruPacketList *m_pFirstPkt;        // 第一个pkt位置
