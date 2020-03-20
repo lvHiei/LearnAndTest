@@ -7,21 +7,30 @@
 #include <stdio.h>
 #include <unistd.h>
 
+#include "TimeUtil.h"
+
 std::atomic_int x, y;
 pthread_mutex_t mutex;
 pthread_cond_t cond;
 bool want_stop = false;
 
-
+uint32_t last_request_time = 0;
 int r1, r2;
-int ft1(){
-    while(!want_stop){
-        pthread_mutex_lock(&mutex);
-        usleep(500 * 1000);
-        pthread_cond_wait(&cond, &mutex);
-        pthread_mutex_unlock(&mutex);
 
-        usleep(500 * 1000);        
+using namespace vvav;
+
+int ft1(){
+    int rendertimes = 0;
+    uint32_t now = 0;
+    while(!want_stop){
+        if(now == 0 || now == last_request_time){
+            pthread_mutex_lock(&mutex);
+            pthread_cond_wait(&cond, &mutex);
+            pthread_mutex_unlock(&mutex);
+        }
+        printf("rendering %d times...\n", ++rendertimes);
+        now = last_request_time;
+        usleep(60 * 1000);        
     }
 
     printf("ft1 end \n");
@@ -32,7 +41,13 @@ int ft1(){
 int ft2(){
 
     usleep(300 * 1000);
-
+    int i = 0;
+    while(i++ < 300){
+        printf("request render %d\n", i);
+        last_request_time = TimeUtil::GetTickCount();
+        pthread_cond_signal(&cond);
+        usleep(40 * 1000);
+    }
     want_stop = true;
     pthread_cond_signal(&cond);
 

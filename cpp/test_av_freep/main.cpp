@@ -5,6 +5,7 @@
 
 #include <cstdio>
 
+#include "libavformat/avformat.h"
 class Base{
 public:
     Base(){printf("Base()\n");}
