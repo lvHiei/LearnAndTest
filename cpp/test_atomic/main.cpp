@@ -26,8 +26,8 @@ void f2(){
 
 int main(){
     //test_memory_order_relaxed();
-    test_memory_order_acquire_release();
-
+    //test_memory_order_acquire_release();
+    test_memory_order_acq_rel();
     while(1){
     ai = 0;
     aii = 0;

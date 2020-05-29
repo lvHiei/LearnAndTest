@@ -7,4 +7,5 @@ add_executable(test_atomic
     main.cpp
     order_relax.cpp
     order_acquire_release.cpp
+    rand.cpp
     )
